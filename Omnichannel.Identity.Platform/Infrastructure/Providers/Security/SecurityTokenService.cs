@@ -27,9 +27,9 @@ namespace Omnichannel.Identity.Platform.Infrastructure.Providers.Security
                     new[]
                     {
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
-                        new Claim(JwtRegisteredClaimNames.UniqueName, data.Email),
-                        new Claim(JwtRegisteredClaimNames.GivenName, data.Name),
-                        new Claim(JwtRegisteredClaimNames.FamilyName, data.Company)
+                        new Claim("username", data.Email),
+                        new Claim("name", data.Name),
+                        new Claim("company", data.Company)
                     });
                 var handler = new JwtSecurityTokenHandler();
                 var securityToken = handler.CreateToken(new SecurityTokenDescriptor

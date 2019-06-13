@@ -21,6 +21,8 @@
         <Folder Include="Application\Users\Queries\DTOs\" />
         <Folder Include="Infrastructure\Providers\Security\" />
         <Folder Include="Infrastructure\Providers\Security\Models\" />
+        <Folder Include="Infrastructure\Providers\Cache\" />
+        <Folder Include="Infrastructure\Providers\Cache\Models\" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.2.0" />

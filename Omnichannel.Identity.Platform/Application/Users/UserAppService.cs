@@ -8,6 +8,7 @@ using Omnichannel.Identity.Platform.Application.Users.Commands.Actions;
 using Omnichannel.Identity.Platform.Application.Users.Queries;
 using Omnichannel.Identity.Platform.Application.Users.Queries.DTOs;
 using Omnichannel.Identity.Platform.Application.Users.Queries.Filters;
+using Omnichannel.Identity.Platform.Infrastructure.Providers.Cache.Models;
 using Omnichannel.Identity.Platform.Infrastructure.Providers.Security;
 using Omnichannel.Identity.Platform.Infrastructure.Providers.Security.Models;
 
@@ -17,18 +18,21 @@ namespace Omnichannel.Identity.Platform.Application.Users
     {
         readonly IUserCommandHandler _userCommandHandler;
         readonly IUserQueryHandler _userQueryHandler;
-        readonly ICacheService _cacheService;
         readonly ISecurityTokenService _securityTokenService;
+        readonly ICacheService _cacheService;
+        readonly CacheConfiguration _cacheConfiguration;
 
         public UserAppService(IUserCommandHandler userCommandHandler,
                               IUserQueryHandler userQueryHandler,
+                              ISecurityTokenService securityTokenService,
                               ICacheService cacheService,
-                              ISecurityTokenService securityTokenService)
+                              CacheConfiguration cacheConfiguration)
         {
             _userCommandHandler = userCommandHandler ?? throw new ArgumentNullException(nameof(userCommandHandler));
             _userQueryHandler = userQueryHandler ?? throw new ArgumentNullException(nameof(userQueryHandler));
-            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
             _securityTokenService = securityTokenService ?? throw new ArgumentNullException(nameof(securityTokenService));
+            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
+            _cacheConfiguration = cacheConfiguration ?? throw new ArgumentNullException(nameof(cacheConfiguration));
         }
 
         public async Task Create(CreateUserCommand command, CancellationToken cancellationToken = default)
@@ -57,7 +61,9 @@ namespace Omnichannel.Identity.Platform.Application.Users
                 // create a token for the new logged user
                 user.Token = _securityTokenService.CreateToken(tokenData);
 
-                _cacheService.Set(user.Token, JsonConvert.SerializeObject(user));
+                // add the user token to the cache
+                //var cacheKey = _cacheConfiguration.GetCacheKey(user.Company, user.Email);
+                //_cacheService.Set(cacheKey, JsonConvert.SerializeObject(user));
 
                 return user;
             }
@@ -65,24 +71,26 @@ namespace Omnichannel.Identity.Platform.Application.Users
             { throw ex; }
         }
 
-        public void Logout(string token)
+        public void Logout(string company, string email)
         {
+            var cacheKey = _cacheConfiguration.GetCacheKey(company, email);
+
             try
             {
-                _cacheService.Remove(token);
+                _cacheService.Remove(cacheKey);
             }
             catch (Exception ex)
             { throw ex; }
         }
 
-        public UserDTO GetUser(string token)
+        public UserDTO GetUser(string company, string email)
         {
+            var cacheKey = _cacheConfiguration.GetCacheKey(company, email);
+
             try
             {
-                if (!_cacheService.Exists(token)) throw new InvalidOperationException("user is not logged in.");
-
                 return JsonConvert.DeserializeObject<UserDTO>(
-                    _cacheService.Get(token));
+                    _cacheService.Get(cacheKey));
             }
             catch (Exception ex)
             { throw ex; }

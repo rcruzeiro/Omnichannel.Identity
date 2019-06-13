@@ -10,7 +10,7 @@ namespace Omnichannel.Identity.Platform.Infrastructure.Database.Configurations
         {
             builder.ToTable("users").HasIndex(u => u.ID);
             builder.Property(u => u.ID).HasColumnName("id");
-            builder.Property(u => u.Company).HasColumnName("company");
+            builder.Property(u => u.Company).HasColumnName("company").IsRequired();
             builder.Property(u => u.Name).HasColumnName("name").IsRequired();
             builder.Property(u => u.CPF).HasColumnName("cpf").IsRequired();
             builder.Property(u => u.Email).HasColumnName("email").IsRequired();

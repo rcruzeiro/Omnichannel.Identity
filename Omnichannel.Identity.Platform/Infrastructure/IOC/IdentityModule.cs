@@ -4,6 +4,7 @@ using Core.Framework.Cache.Redis;
 using Core.Framework.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -13,6 +14,7 @@ using Omnichannel.Identity.Platform.Application.Users.Queries;
 using Omnichannel.Identity.Platform.Domain;
 using Omnichannel.Identity.Platform.Infrastructure.Database;
 using Omnichannel.Identity.Platform.Infrastructure.Database.Repositories;
+using Omnichannel.Identity.Platform.Infrastructure.Providers.Cache.Models;
 using Omnichannel.Identity.Platform.Infrastructure.Providers.Security;
 using Omnichannel.Identity.Platform.Infrastructure.Providers.Security.Models;
 
@@ -63,8 +65,11 @@ namespace Omnichannel.Identity.Platform.Infrastructure.IOC
                     .RequireAuthenticatedUser().Build());
             });
 
+            // HTTP Context
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             // data source
-            services.AddScoped<IDataSource>(provider =>
+            services.AddSingleton<IDataSource>(provider =>
                 new DefaultDataSource(configuration, "IdentityDb"));
 
             // unit of work
@@ -72,10 +77,13 @@ namespace Omnichannel.Identity.Platform.Infrastructure.IOC
 
             // providers
             // cache
-            services.AddScoped<ICacheService>(provider =>
+            services.AddSingleton<ICacheService>(provider =>
                 new RedisCacheService(configuration.GetValue<string>("Redis:Endpoint"),
                                       configuration.GetValue<int>("Redis:Database"))
-                { Expires = TimeSpan.FromDays(configuration.GetValue<int>("Redis:Expires")) });
+                { Expires = TimeSpan.FromSeconds(configuration.GetValue<int>("Redis:Expires")) });
+
+            services.AddSingleton(provider =>
+                new CacheConfiguration(configuration.GetValue<string>("Redis:CacheKey")));
 
             // security token
             services.AddScoped<ISecurityTokenService>(provider =>

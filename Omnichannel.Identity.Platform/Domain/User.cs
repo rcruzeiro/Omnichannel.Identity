@@ -21,12 +21,29 @@ namespace Omnichannel.Identity.Platform.Domain
 
         public bool Active { get; private set; }
 
+        public string LogInToken { get; private set; }
+
+        public DateTimeOffset? LastLogin { get; private set; }
+
         public DateTimeOffset CreatedAt { get; set; }
 
         public DateTimeOffset? UpdatedAt { get; set; }
 
         protected User()
         { }
+
+        public void Login(string token)
+        {
+            LogInToken = token;
+            LastLogin = DateTimeOffset.Now;
+            UpdatedAt = DateTimeOffset.Now;
+        }
+
+        public void Logout()
+        {
+            LogInToken = string.Empty;
+            UpdatedAt = DateTimeOffset.Now;
+        }
 
         public static User Create(string company, string name, string cpf, string email, string password)
         {

@@ -32,6 +32,44 @@ namespace Omnichannel.Identity.Platform.Application.Users.Commands
             { throw ex; }
         }
 
+        public async Task ExecuteAsync(LoginUserCommand command, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                ValidateCommand(command);
+
+                var user = await _userRepository.GetOneAsync(u => u.ID == command.UserId);
+
+                if (user == null) throw new ArgumentNullException(nameof(user));
+
+                user.Login(command.Token);
+
+                _userRepository.Update(user);
+                await _userRepository.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            { throw ex; }
+        }
+
+        public async Task ExecuteAsync(LogoutUserCommand command, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                ValidateCommand(command);
+
+                var user = await _userRepository.GetOneAsync(u => u.Company == command.Company && u.Email == command.Email);
+
+                if (user == null) throw new ArgumentNullException(nameof(user));
+
+                user.Logout();
+
+                _userRepository.Update(user);
+                await _userRepository.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            { throw ex; }
+        }
+
         void ValidateCommand<T>(T command)
             where T : class, ICommand
         {

@@ -14,6 +14,7 @@
       <NoWarn>1701;1702;1591</NoWarn>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="Core.Framework.API.Messages" Version="1.5.0" />
         <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.5" AllowExplicitVersion="true" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
     </ItemGroup>

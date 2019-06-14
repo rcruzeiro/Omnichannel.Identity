@@ -16,6 +16,8 @@ namespace Omnichannel.Identity.Platform.Infrastructure.Database.Configurations
             builder.Property(u => u.Email).HasColumnName("email").IsRequired();
             builder.Property(u => u.Password).HasColumnName("password").IsRequired();
             builder.Property(u => u.Active).HasColumnName("active").IsRequired().HasDefaultValue(1);
+            builder.Property(u => u.LogInToken).HasColumnName("login_token");
+            builder.Property(u => u.LastLogin).HasColumnName("last_login");
             builder.Property(u => u.CreatedAt).HasColumnName("created_at").IsRequired().HasDefaultValueSql("now()");
             builder.Property(u => u.UpdatedAt).HasColumnName("updated_at");
         }

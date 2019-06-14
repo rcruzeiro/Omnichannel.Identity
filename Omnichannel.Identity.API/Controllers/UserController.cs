@@ -2,12 +2,14 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Core.Framework.API.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Omnichannel.Identity.API.Messages.User;
 using Omnichannel.Identity.Platform.Application.Users;
 using Omnichannel.Identity.Platform.Application.Users.Commands.Actions;
-using Omnichannel.Identity.Platform.Application.Users.Queries.DTOs;
+using Omnichannel.Identity.Platform.Application.Users.Queries.Filters;
 
 namespace Omnichannel.Identity.API.Controllers
 {
@@ -28,49 +30,61 @@ namespace Omnichannel.Identity.API.Controllers
         /// <summary>
         /// Creates a new user.
         /// </summary>
-        /// <param name="command">Create user command.</param>
+        /// <param name="request">Create user command.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <response code="201">User created with success.</response>
         [AllowAnonymous]
         [ProducesResponseType(201)]
-        [ProducesResponseType(500)]
+        [ProducesResponseType(typeof(CreateUserResponse), 500)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]CreateUserCommand command, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Post([FromBody]CreateUserCommand request, CancellationToken cancellationToken = default)
         {
+            var response = new CreateUserResponse();
+
             try
             {
-                await _userAppService.Create(command, cancellationToken);
+                await _userAppService.Create(request, cancellationToken);
 
                 return StatusCode(201);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                response.StatusCode = 500;
+                response.Messages.Add(ResponseMessage.Create(ex, ""));
+                return StatusCode(500, response);
             }
         }
         /// <summary>
         /// Get the specified token user.
         /// </summary>
-        //[Authorize("Bearer")]
-        //[ProducesResponseType(typeof(UserDTO), 200)]
-        //[ProducesResponseType(500)]
-        //[HttpGet]
-        //public IActionResult Get()
-        //{
-        //    try
-        //    {
-        //        // get company and email data from jwt
-        //        var company = _httpContext.HttpContext.User.Claims.First(c => c.Type == "company")?.Value;
-        //        var email = _httpContext.HttpContext.User.Claims.First(c => c.Type == "username")?.Value;
+        [Authorize("Bearer")]
+        [ProducesResponseType(typeof(GetUserResponse), 200)]
+        [ProducesResponseType(typeof(GetUserResponse), 500)]
+        [HttpGet]
+        public async Task<IActionResult> Get(CancellationToken cancellationToken = default)
+        {
+            var response = new GetUserResponse();
 
-        //        var user = _userAppService.GetUser(company, email);
+            try
+            {
+                // get company and email data from jwt
+                var company = _httpContext.HttpContext.User.Claims.First(c => c.Type == "company")?.Value;
+                var email = _httpContext.HttpContext.User.Claims.First(c => c.Type == "username")?.Value;
+                var filter = new GetUserFilter(company, email);
 
-        //        return Ok(user);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, ex);
-        //    }
-        //}
+                var user = await _userAppService.GetUser(filter, cancellationToken);
+
+                response.StatusCode = 200;
+                response.Data = user;
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.Messages.Add(ResponseMessage.Create(ex, ""));
+                return StatusCode(500, response);
+            }
+        }
     }
 }

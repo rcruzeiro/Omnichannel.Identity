@@ -2,11 +2,13 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Core.Framework.API.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
+using Omnichannel.Identity.API.Messages.Auth;
 using Omnichannel.Identity.Platform.Application.Users;
+using Omnichannel.Identity.Platform.Application.Users.Commands.Actions;
 using Omnichannel.Identity.Platform.Application.Users.Queries.Filters;
 
 namespace Omnichannel.Identity.API.Controllers
@@ -28,52 +30,69 @@ namespace Omnichannel.Identity.API.Controllers
         /// <summary>
         /// Login user.
         /// </summary>
-        /// <param name="data">
-        /// User login payload; must be:
-        /// {"company": "string", "email": "string", "password": "string"}
-        /// </param>
+        /// <param name="request">Request data.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         [AllowAnonymous]
-        [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType(500)]
+        [ProducesResponseType(typeof(LoginResponse), 200)]
+        [ProducesResponseType(typeof(LoginResponse), 404)]
+        [ProducesResponseType(typeof(LoginResponse), 500)]
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody]JObject data, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Login([FromBody]LoginRequest request, CancellationToken cancellationToken = default)
         {
+            var response = new LoginResponse();
+
             try
             {
-                var filter = data.ToObject<LoginFilter>();
+                var filter = new LoginFilter(request.Company, request.Email, request.Password);
                 var user = await _userAppService.Login(filter, cancellationToken);
 
-                return Ok(new { user.Token });
+                if (user == null)
+                {
+                    response.StatusCode = 404;
+                    response.Messages.Add(ResponseMessage.Create("", "Cannot find user with this parameters."));
+                    return NotFound(response);
+                };
+
+                response.StatusCode = 200;
+                response.Data = user.Token;
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                response.StatusCode = 500;
+                response.Messages.Add(ResponseMessage.Create(ex, ""));
+                return StatusCode(500, response);
             }
         }
         /// <summary>
         /// Logout user.
         /// </summary>
-        //[Authorize("Bearer")]
-        //[ProducesResponseType(204)]
-        //[ProducesResponseType(500)]
-        //[HttpDelete]
-        //public IActionResult Logout()
-        //{
-        //    try
-        //    {
-        //        // get company and email data from jwt
-        //        var company = _httpContext.HttpContext.User.Claims.First(c => c.Type == "company")?.Value;
-        //        var email = _httpContext.HttpContext.User.Claims.First(c => c.Type == "username")?.Value;
+        [Authorize("Bearer")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(LogoutResponse), 500)]
+        [HttpDelete]
+        public async Task<IActionResult> Logout(CancellationToken cancellationToken = default)
+        {
+            var response = new LogoutResponse();
 
-        //        _userAppService.Logout(company, email);
+            try
+            {
+                // get company and email data from jwt
+                var company = _httpContext.HttpContext.User.Claims.First(c => c.Type == "company")?.Value;
+                var email = _httpContext.HttpContext.User.Claims.First(c => c.Type == "username")?.Value;
+                var command = new LogoutUserCommand(company, email);
 
-        //        return NoContent();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, ex);
-        //    }
-        //}
+                await _userAppService.Logout(command, cancellationToken);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.Messages.Add(ResponseMessage.Create(ex, ""));
+                return StatusCode(500, response);
+            }
+        }
     }
 }

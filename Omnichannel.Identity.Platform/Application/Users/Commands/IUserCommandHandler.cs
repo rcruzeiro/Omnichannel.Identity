@@ -4,6 +4,8 @@ using Omnichannel.Identity.Platform.Application.Users.Commands.Actions;
 namespace Omnichannel.Identity.Platform.Application.Users.Commands
 {
     public interface IUserCommandHandler :
-        ICommandHandlerAsync<CreateUserCommand>
+        ICommandHandlerAsync<CreateUserCommand>,
+        ICommandHandlerAsync<LoginUserCommand>,
+        ICommandHandlerAsync<LogoutUserCommand>
     { }
 }

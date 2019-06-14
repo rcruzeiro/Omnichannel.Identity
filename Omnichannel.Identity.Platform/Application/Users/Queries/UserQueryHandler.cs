@@ -17,6 +17,20 @@ namespace Omnichannel.Identity.Platform.Application.Users.Queries
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
+        public async Task<UserDTO> HandleAsync(GetUserFilter filter, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                ValidateFilter(filter);
+
+                var user = await _userRepository.GetOneAsync(filter, cancellationToken);
+
+                return user.ToDTO();
+            }
+            catch (Exception ex)
+            { throw ex; }
+        }
+
         public async Task<UserDTO> HandleAsync(LoginFilter filter, CancellationToken cancellationToken = default)
         {
             try

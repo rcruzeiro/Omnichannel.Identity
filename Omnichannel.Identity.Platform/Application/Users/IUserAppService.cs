@@ -10,7 +10,7 @@ namespace Omnichannel.Identity.Platform.Application.Users
     {
         Task Create(CreateUserCommand command, CancellationToken cancellationToken = default);
         Task<UserDTO> Login(LoginFilter filter, CancellationToken cancellationToken = default);
-        void Logout(string company, string email);
-        UserDTO GetUser(string company, string email);
+        Task Logout(LogoutUserCommand command, CancellationToken cancellationToken = default);
+        Task<UserDTO> GetUser(GetUserFilter filter, CancellationToken cancellationToken = default);
     }
 }

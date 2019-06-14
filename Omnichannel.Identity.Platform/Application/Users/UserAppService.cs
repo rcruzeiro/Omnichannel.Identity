@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Framework.Cache;
-using Newtonsoft.Json;
 using Omnichannel.Identity.Platform.Application.Users.Commands;
 using Omnichannel.Identity.Platform.Application.Users.Commands.Actions;
 using Omnichannel.Identity.Platform.Application.Users.Queries;
@@ -58,12 +57,10 @@ namespace Omnichannel.Identity.Platform.Application.Users
                 // create token data
                 var tokenData = new TokenData(user.Company, user.Name, user.Email);
 
-                // create a token for the new logged user
+                // create and save a token for the logged user
                 user.Token = _securityTokenService.CreateToken(tokenData);
-
-                // add the user token to the cache
-                //var cacheKey = _cacheConfiguration.GetCacheKey(user.Company, user.Email);
-                //_cacheService.Set(cacheKey, JsonConvert.SerializeObject(user));
+                var loginCommand = new LoginUserCommand(user.Id, user.Token);
+                await _userCommandHandler.ExecuteAsync(loginCommand, cancellationToken);
 
                 return user;
             }
@@ -71,26 +68,21 @@ namespace Omnichannel.Identity.Platform.Application.Users
             { throw ex; }
         }
 
-        public void Logout(string company, string email)
+        public async Task Logout(LogoutUserCommand command, CancellationToken cancellationToken = default)
         {
-            var cacheKey = _cacheConfiguration.GetCacheKey(company, email);
-
             try
             {
-                _cacheService.Remove(cacheKey);
+                await _userCommandHandler.ExecuteAsync(command, cancellationToken);
             }
             catch (Exception ex)
             { throw ex; }
         }
 
-        public UserDTO GetUser(string company, string email)
+        public async Task<UserDTO> GetUser(GetUserFilter filter, CancellationToken cancellationToken = default)
         {
-            var cacheKey = _cacheConfiguration.GetCacheKey(company, email);
-
             try
             {
-                return JsonConvert.DeserializeObject<UserDTO>(
-                    _cacheService.Get(cacheKey));
+                return await _userQueryHandler.HandleAsync(filter, cancellationToken);
             }
             catch (Exception ex)
             { throw ex; }

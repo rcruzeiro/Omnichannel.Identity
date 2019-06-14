@@ -29,6 +29,7 @@ namespace Omnichannel.Identity.Platform.Application.Users.Queries.DTOs
                 CPF = user.CPF,
                 Email = user.Email,
                 Active = user.Active,
+                Token = user.LogInToken,
                 CreatedAt = user.CreatedAt
             };
         }

@@ -57,7 +57,7 @@ namespace Omnichannel.Identity.Platform.Application.Users.Commands
             {
                 ValidateCommand(command);
 
-                var user = await _userRepository.GetOneAsync(u => u.Company == command.Company && u.Email == command.Email);
+                var user = await _userRepository.GetOneAsync(u => u.Company == command.Company && u.CPF == command.CPF);
 
                 if (user == null) throw new ArgumentNullException(nameof(user));
 

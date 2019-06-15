@@ -10,12 +10,12 @@ namespace Omnichannel.Identity.Platform.Application.Users.Commands.Actions
         public string Company { get; set; }
 
         [Required]
-        public string Email { get; set; }
+        public string CPF { get; set; }
 
         public LogoutUserCommand(string company, string email)
         {
             Company = company;
-            Email = email;
+            CPF = email;
         }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -23,8 +23,8 @@ namespace Omnichannel.Identity.Platform.Application.Users.Commands.Actions
             if (string.IsNullOrEmpty(Company))
                 yield return new ValidationResult("invalid company.", new[] { nameof(Company) });
 
-            if (string.IsNullOrEmpty(Email))
-                yield return new ValidationResult("invalid e-mail.", new[] { nameof(Email) });
+            if (string.IsNullOrEmpty(CPF))
+                yield return new ValidationResult("invalid CPF.", new[] { nameof(CPF) });
         }
     }
 }

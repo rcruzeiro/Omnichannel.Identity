@@ -48,6 +48,7 @@ namespace Omnichannel.Identity.API
             app.UseStatusCodePages();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseAuthentication();
 
             // .net core 2.2 health check
             app.UseHealthChecks("/status");

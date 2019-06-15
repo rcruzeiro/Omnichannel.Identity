@@ -31,7 +31,7 @@ namespace Omnichannel.Identity.Platform.Infrastructure.IOC
             if (services == null) throw new ArgumentNullException(nameof(services));
 
             // jwt configuration
-            var siginConfiguration = new SigninConfiguration();
+            var siginConfiguration = new SigninConfiguration(configuration.GetValue<string>("Security:Key"));
             var tokenConfiguration = new TokenConfiguration();
             new ConfigureFromConfigurationOptions<TokenConfiguration>(
                 configuration.GetSection("Token")).Configure(tokenConfiguration);

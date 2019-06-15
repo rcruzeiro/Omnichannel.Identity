@@ -43,7 +43,7 @@ namespace Omnichannel.Identity.API.Controllers
 
             try
             {
-                var filter = new LoginFilter(request.Company, request.Email, request.Password);
+                var filter = new LoginFilter(request.Company, request.CPF, request.Password);
                 var user = await _userAppService.Login(filter, cancellationToken);
 
                 if (user == null)
@@ -51,7 +51,7 @@ namespace Omnichannel.Identity.API.Controllers
                     response.StatusCode = 404;
                     response.Messages.Add(ResponseMessage.Create("", "Cannot find user with this parameters."));
                     return NotFound(response);
-                };
+                }
 
                 response.StatusCode = 200;
                 response.Data = user.Token;

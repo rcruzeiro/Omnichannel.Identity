@@ -12,18 +12,18 @@ namespace Omnichannel.Identity.Platform.Application.Users.Queries.Filters
         public string Company { get; set; }
 
         [Required]
-        public string Email { get; set; }
+        public string CPF { get; set; }
 
         [Required]
         public string Password { get; set; }
 
-        public LoginFilter(string company, string email, string password)
+        public LoginFilter(string company, string cpf, string password)
             : base(u => u.Company == company &&
-                        u.Email == email &&
+                        u.CPF == cpf &&
                         u.Password == User.CreatePasswordHash(password))
         {
             Company = company;
-            Email = email;
+            CPF = cpf;
             Password = password;
         }
 
@@ -32,8 +32,8 @@ namespace Omnichannel.Identity.Platform.Application.Users.Queries.Filters
             if (string.IsNullOrEmpty(Company))
                 yield return new ValidationResult("invalid company.", new[] { nameof(Company) });
 
-            if (string.IsNullOrEmpty(Email))
-                yield return new ValidationResult("invalid email.", new[] { nameof(Email) });
+            if (string.IsNullOrEmpty(CPF))
+                yield return new ValidationResult("invalid CPF.", new[] { nameof(CPF) });
 
             if (string.IsNullOrEmpty(Password))
                 yield return new ValidationResult("invalid password.", new[] { nameof(Password) });

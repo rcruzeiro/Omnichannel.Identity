@@ -26,6 +26,9 @@ namespace Omnichannel.Identity.API
                     config.AddEnvironmentVariables();
                     Configuration = config.Build();
                 })
-                .UseStartup<Startup>();
+                .UseKestrel()
+                .UseUrls("http://*:80")
+                .UseStartup<Startup>()
+                .UseIISIntegration();
     }
 }

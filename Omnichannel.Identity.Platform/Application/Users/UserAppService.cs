@@ -55,7 +55,7 @@ namespace Omnichannel.Identity.Platform.Application.Users
                 if (!user.Active) throw new InvalidOperationException("user is currently not active.");
 
                 // create token data
-                var tokenData = new TokenData(user.Company, user.Name, user.Email);
+                var tokenData = new TokenData(user.Company, user.Name, user.Email, user.CPF);
 
                 // create and save a token for the logged user
                 user.Token = _securityTokenService.CreateToken(tokenData);

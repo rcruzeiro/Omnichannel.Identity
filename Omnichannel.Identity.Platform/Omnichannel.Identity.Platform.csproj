@@ -32,6 +32,6 @@
         <PackageReference Include="Core.Framework.Cache" Version="1.2.3" />
         <PackageReference Include="Core.Framework.Cqrs" Version="1.0.1" />
         <PackageReference Include="Core.Framework.Repository" Version="2.1.1" />
-        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.5" AllowExplicitVersion="true" />
+        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.6" AllowExplicitVersion="true" />
     </ItemGroup>
 </Project>
